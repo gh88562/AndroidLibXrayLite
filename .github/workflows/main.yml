@@ -70,6 +70,6 @@ jobs:
         -d "{
           \"ref\": \"master\",
           \"inputs\": {
-            \"release_tag\": \"${{ env.LATEST_XRAY_TAG_NAME }}\"
+            \"release_tag\": \"${{ github.event.inputs.release_tag }}\"
           }
         }"
