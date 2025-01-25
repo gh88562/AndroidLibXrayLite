@@ -61,34 +61,16 @@ jobs:
         tag: ${{ github.event.inputs.release_tag }}
         file_glob: true
     
-    - name: Prepare source repository
-      env: 
-        TAG: ${{ github.event.inputs.release_tag }}
+    - name: Trigger workflow
+      if: env.XRAY_NEEDS_UPDATE == 'true'
       run: |
-        git clone https://github.com/2dust/v2rayNG.git
-        cd v2rayNG
-        git submodule update --init --recursive AndroidLibXrayLite
-        git submodule foreach "git fetch origin && git checkout $TAG"
-
-        if [[ -n "$(git status -s)" ]]; then
-          echo "needs_update=true" >> $GITHUB_ENV
-        else
-          echo "needs_update=false" >> $GITHUB_ENV
-        fi
-
-    - name: Push changes to update branch
-      if: env.needs_update == 'true'
-      env:
-        GH_TOKEN: ${{ secrets.GH_REPO_TOKEN }}
-      run: |
-        git config --global user.name "${{ github.actor }}"
-        git config --global user.email "${{ github.actor }}@users.noreply.github.com"
-
-        git remote add myfork https://github.com/${{ github.actor }}/v2rayNG.git
-
-        git checkout -b update-libxraylite-${{ github.event.inputs.release_tag }}
-        git add .
-        git commit -m "Update AndroidLibXrayLite to ${{ github.event.inputs.release_tag }}"
-        git push myfork update-libxraylite-${{ github.event.inputs.release_tag }}
-
-    #
+        curl -X POST \
+        -H "Accept: application/vnd.github.v3+json" \
+        -H "Authorization: token ${{ secrets.GH_REPO_TOKEN }}" \
+        https://api.github.com/repos/${{ github.actor }}/v2rayNG/actions/workflows/update.yml/dispatches \
+        -d "{
+          \"ref\": \"master\",
+          \"inputs\": {
+            \"release_tag\": \"${{ env.LATEST_XRAY_TAG_NAME }}\"
+          }
+        }"
