@@ -62,7 +62,6 @@ jobs:
         file_glob: true
     
     - name: Trigger workflow
-      if: env.XRAY_NEEDS_UPDATE == 'true'
       run: |
         curl -X POST \
         -H "Accept: application/vnd.github.v3+json" \
