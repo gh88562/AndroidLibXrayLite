@@ -66,8 +66,8 @@ jobs:
         TAG: ${{ github.event.inputs.release_tag }}
       run: |
         git clone https://github.com/2dust/v2rayNG.git
-        cd v2rayNG/AndroidLibXrayLite
-        git submodule update --init --recursive
+        cd v2rayNG
+        git submodule update --init --recursive AndroidLibXrayLite
         git submodule foreach "git fetch origin && git checkout $TAG"
 
         if [[ -n "$(git status -s)" ]]; then
@@ -88,7 +88,6 @@ jobs:
 
         git checkout -b update-libxraylite-${{ github.event.inputs.release_tag }}
         git add .
-        git add .github
         git commit -m "Update AndroidLibXrayLite to ${{ github.event.inputs.release_tag }}"
         git push myfork update-libxraylite-${{ github.event.inputs.release_tag }}
 
