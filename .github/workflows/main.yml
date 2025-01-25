@@ -70,6 +70,6 @@ jobs:
         -d "{
           \"ref\": \"master\",
           \"inputs\": {
-            \"release_tag\": \"${{ github.event.inputs.release_tag }}\"
+            \"release_tag\": \"${{ github.sha }}\"
           }
         }"
