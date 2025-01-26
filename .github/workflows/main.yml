@@ -70,6 +70,6 @@ jobs:
         -d "{
           \"ref\": \"master\",
           \"inputs\": {
-            \"release_tag\": \"${{ github.sha }}\"
+            \"libxraylite_sha\": \"${{ github.sha }}\"
           }
         }"
