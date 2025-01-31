@@ -60,3 +60,16 @@ jobs:
         file: ./libv2ray*r
         tag: ${{ github.event.inputs.release_tag }}
         file_glob: true
+
+    - name: Trigger workflow
+      run: |
+        curl -X POST \
+        -H "Accept: application/vnd.github.v3+json" \
+        -H "Authorization: token ${{ secrets.GH_REPO_TOKEN }}" \
+        https://api.github.com/repos/gh88562/v2rayNG/actions/workflows/update.yml/dispatches \
+        -d "{
+          \"ref\": \"master\",
+          \"inputs\": {
+            \"release_tag\": \"${{ github.event.inputs.release_tag }}\"
+          }
+        }"
