@@ -1,0 +1,99 @@
+name: Update Go Version
+
+on:
+  schedule:
+    - cron: '0 */1 * * *'
+  workflow_dispatch:
+
+jobs:
+  check-and-update:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
+    - name: Checkout branch
+      uses: actions/checkout@v4
+      with:
+        ref: back
+        fetch-depth: 0
+
+    - name: Add upstream repository
+      run: |
+        git remote add upstream https://github.com/2dust/AndroidLibXrayLite.git
+        git fetch upstream
+
+    - name: Merge upstream changes
+      run: |
+        git config user.name "GitHub Actions"
+        git config user.email "actions@github.com"
+        git merge upstream/main --no-edit
+
+    - name: Get current Go version
+      id: get-version
+      run: |
+        CURRENT_VERSION=$(grep -m1 '^go ' go.mod | awk '{print $2}' | sed 's/go//')
+        echo "current_version=${CURRENT_VERSION}" >> $GITHUB_OUTPUT
+
+    - name: Check target repo
+      id: check-target
+      run: |
+        version_gt() { 
+          [ "$(printf '%s\n' "$@" | sort -Vr | head -n1)" = "$1" ]
+        }
+
+        target_raw=$(curl -sL "https://raw.githubusercontent.com/xtls/Xray-core/main/go.mod")
+
+        target_ver=$(echo "$target_raw" | grep -m1 '^go ' | awk '{print $2}' | sed 's/go//')
+        all_versions=$(curl -s https://go.dev/dl/?mode=json | 
+          jq -r '.[] | select(.stable == true) | .version' |
+          sed 's/go//' | sort -V)
+
+        current_ver="${{ steps.get-version.outputs.current_version }}"
+        target_major=$(echo "$target_ver" | cut -d. -f1,2)
+        current_major=$(echo "$current_ver" | cut -d. -f1,2)
+
+        if version_gt "$target_major" "$current_major"; then
+          candidate_version=$(echo "$all_versions" | 
+            awk -v maj="$target_major" 'BEGIN{FS=OFS="."} $1"."$2 == maj' |
+            tail -n1)
+        else
+          candidate_version=$(echo "$all_versions" | 
+            awk -v maj="$current_major" 'BEGIN{FS=OFS="."} $1"."$2 == maj' |
+            tail -n1)
+        fi
+
+        if [ -n "$candidate_version" ] && version_gt "$candidate_version" "$current_ver"; then
+          echo "new_version=${candidate_version}" >> $GITHUB_OUTPUT
+        else
+          exit 0
+        fi
+
+    - name: Update and push changes
+      if: steps.check-target.outputs.new_version
+      run: |
+        new_ver="${{ steps.check-target.outputs.new_version}}"
+        sed -i "s/^go .*/go ${new_ver}/" go.mod
+        
+        git add go.mod
+        git commit -m "chore: update Go to ${new_ver}"
+        git push origin HEAD:update-go-${new_ver}
+
+    - name: Create PR to upstream
+      if: steps.check-target.outputs.new_version
+      uses: peter-evans/create-pull-request@v5
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        title: "Update Go to ${{ steps.check-target.outputs.new_version }}"
+        branch: update-go-${{ steps.check-target.outputs.new_version }}
+        base: main
+        repository: 2dust/AndroidLibXrayLite
+        body: "Automated Go version update from upstream"
+
+    - name: Delete old Workflows
+        uses: ophub/delete-releases-workflows@main
+        with:
+          gh_token: ${{secrets.GITHUB_TOKEN}}
+          delete_workflows: true
+          workflows_keep_day: 0
