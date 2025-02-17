@@ -26,8 +26,8 @@ jobs:
 
     - name: Merge upstream changes
       run: |
-        git config user.name "${{ github.author }}"
-        git config user.email "${{ github.author }} <${{ github.autorid }}+${{ github.author }}@users.noreply.github.com>"
+        git config user.name "${{ github.actor }}"
+        git config user.email "${{ github.actor }} <${{ github.autor_id }}+${{ github.actor }}@users.noreply.github.com>"
         git merge upstream/main --no-edit
 
     - name: Get current Go version
@@ -86,8 +86,8 @@ jobs:
       with:
         token: ${{ secrets.UP_KEY }}
         title: "Update Go to ${{ steps.check-target.outputs.new_version }}"
-        committer: ${{ github.author }}
-        acthor: ${{ github.author }} <${{ github.autorid }}+${{ github.author }}@users.noreply.github.com>
+        committer: ${{ github.actor }}
+        acthor: ${{ github.actor }} <${{ github.autor_id }}+${{ github.actor }}@users.noreply.github.com>
         branch: update-go-${{ steps.check-target.outputs.new_version }}
         base: main
         repository: 2dust/AndroidLibXrayLite
