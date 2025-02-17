@@ -92,8 +92,8 @@ jobs:
         body: "Automated Go version update from upstream"
 
     - name: Delete old Workflows
-        uses: ophub/delete-releases-workflows@main
-        with:
-          gh_token: ${{secrets.GITHUB_TOKEN}}
-          delete_workflows: true
-          workflows_keep_day: 0
+      uses: ophub/delete-releases-workflows@main
+      with:
+        gh_token: ${{secrets.GITHUB_TOKEN}}
+        delete_workflows: true
+        workflows_keep_day: 0
