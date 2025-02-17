@@ -87,7 +87,7 @@ jobs:
         token: ${{ secrets.UP_KEY }}
         title: "Update Go to ${{ steps.check-target.outputs.new_version }}"
         committer: ${{ github.actor }}
-        acthor: ${{ github.actor }} <${{ github.actor_id }}+${{ github.actor }}@users.noreply.github.com>
+        acthor: ${{ github.actor_id }}+${{ github.actor }}@users.noreply.github.com
         branch: update-go-${{ steps.check-target.outputs.new_version }}
         base: main
         repository: 2dust/AndroidLibXrayLite
