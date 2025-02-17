@@ -27,7 +27,7 @@ jobs:
     - name: Merge upstream changes
       run: |
         git config user.name "${{ github.actor }}"
-        git config user.email "${{ github.actor }} <${{ github.actor_id }}+${{ github.actor }}@users.noreply.github.com>"
+        git config user.email "${{ github.actor_id }}+${{ github.actor }}@users.noreply.github.com"
         git merge upstream/main --no-edit
 
     - name: Get current Go version
@@ -82,7 +82,7 @@ jobs:
 
     - name: Create PR to upstream
       if: steps.check-target.outputs.new_version
-      uses: peter-evans/create-pull-request@v5
+      uses: peter-evans/create-pull-request@v7
       with:
         token: ${{ secrets.UP_KEY }}
         title: "Update Go to ${{ steps.check-target.outputs.new_version }}"
