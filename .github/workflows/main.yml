@@ -65,5 +65,6 @@ jobs:
       uses: svenstaro/upload-release-action@v2
       with:
         file: ./libv2ray*r
+        body: "${{ github.event.inputs.release_tag }}"
         tag: ${{ github.event.inputs.release_tag }}
         file_glob: true
